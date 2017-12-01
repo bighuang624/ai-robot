@@ -6,7 +6,9 @@
     </header>
     <ChatBox></ChatBox>
     <footer>
-      <textarea name="text-in" id="text-in" autocomplete="off" v-model="input"></textarea>
+      <textarea name="text-in" id="text-in" autocomplete="off" v-model="input" @focus="hideTips"
+                @active="hideTips" @blur="showTips"
+                :class="input === '请简要描述您的问题，如“模式识别是什么”' ? 'withTip' : ''"></textarea>
       <button class="train-button">训练</button>
       <button class="send-button">发送</button>
     </footer>
@@ -24,6 +26,18 @@
     data () {
       return {
         input: '请简要描述您的问题，如“模式识别是什么”'
+      }
+    },
+    methods: {
+      hideTips () {
+        if (this.input === '请简要描述您的问题，如“模式识别是什么”') {
+          this.input = ''
+        }
+      },
+      showTips () {
+        if (this.input === '') {
+          this.input = '请简要描述您的问题，如“模式识别是什么”'
+        }
       }
     }
   }
@@ -70,6 +84,10 @@
     width: 100%;
     height: 70px;
     font-weight: normal;
+  }
+
+  #text-in.withTip {
+    color: #b1b1b1;
   }
 
   footer button {
