@@ -4,39 +4,94 @@
       <h2>模式识别课程智能机器人</h2>
       <h5>欢迎随时提问～</h5>
     </header>
-    <ChatBox></ChatBox>
+    <div class="chatbox">
+      <div v-for="dialog in dialogs" class="dialog" :class="dialog.isRobot ? 'robot-dialog' : 'user-dialog'">
+        <img :src="dialog.isRobot ? '/static/robot.jpg' : '/static/user.jpg'">
+        <span v-text="dialog.words"></span>
+      </div>
+    </div>
     <footer>
       <textarea name="text-in" id="text-in" autocomplete="off" v-model="input" @focus="hideTips"
                 @active="hideTips" @blur="showTips"
                 :class="input === '请简要描述您的问题，如“模式识别是什么”' ? 'withTip' : ''"></textarea>
-      <button class="train-button">训练</button>
-      <button class="send-button">发送</button>
+      <el-button class="train-button" @click="dialogFormVisible = true">训 练</el-button>
+      <el-button type="primary" class="send-button" @click="askQuestion">发 送</el-button>
+      <el-dialog title="我也可以教机器人说话啦" :visible.sync="dialogFormVisible">
+        <el-form :model="form">
+          <el-form-item label="问题" :label-width="'120px'">
+            <el-input v-model="form.ask" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="答案" :label-width="'120px'">
+            <el-input v-model="form.answer" auto-complete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="train">确 定</el-button>
+        </div>
+      </el-dialog>
     </footer>
   </div>
 </template>
 
 <script>
-  import ChatBox from './ChatBox.vue'
+  import { ask } from '../api/index'
 
   export default {
     name: 'Board',
-    components: {
-      ChatBox
-    },
     data () {
       return {
-        input: '请简要描述您的问题，如“模式识别是什么”'
+        tips: '请简要描述您的问题，如“模式识别是什么”',
+        input: '请简要描述您的问题，如“模式识别是什么”',
+        dialogs: [{
+          isRobot: true,
+          words: 'Hi~模式识别课程的问题都可以试着问问我哦'
+        }],
+        dialogFormVisible: false,
+        form: {
+          ask: '',
+          answer: ''
+        }
       }
     },
     methods: {
       hideTips () {
-        if (this.input === '请简要描述您的问题，如“模式识别是什么”') {
+        if (this.input === this.tips) {
           this.input = ''
         }
       },
       showTips () {
         if (this.input === '') {
-          this.input = '请简要描述您的问题，如“模式识别是什么”'
+          this.input = this.tips
+        }
+      },
+      askQuestion () {
+        if (this.input === '' || this.input === this.tips) {
+          this.$message.warning('问题不能为空哦')
+        } else {
+          let askDialog = {}
+          askDialog.isRobot = false
+          askDialog.words = this.input
+          this.dialogs.push(askDialog)
+          ask(this.input).then((response) => {
+            let answerDialog = {}
+            answerDialog.isRobot = true
+            answerDialog.words = response.answer
+            this.dialogs.push(answerDialog)
+          })
+          this.input = this.tips
+        }
+      },
+      train () {
+        if (this.form.ask === '') {
+          this.$message.warning('问题不能为空哦')
+        } else if (this.form.answer === '') {
+          this.$message.warning('答案不能为空哦')
+        } else {
+          this.dialogFormVisible = false
+          this.$message.success('提交成功，谢谢参与')
+          this.form.ask = ''
+          this.form.answer = ''
         }
       }
     }
@@ -57,7 +112,7 @@
     height: 80px;
     width: 100%;
     padding: 10px;
-    background-color: #42b983;
+    background-color: #66b1ff;
   }
 
   footer {
@@ -65,6 +120,68 @@
     width: 100%;
     height: 140px;
     position: relative;
+  }
+
+  .chatbox {
+    background-color: #ececec;
+    text-align: left;
+    padding: 0 1em;
+    width: 100%;
+    height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .dialog {
+    position: relative;
+    margin: 16px 0;
+  }
+
+  .dialog img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+  }
+
+  .dialog span {
+    font-size: 14px;
+    padding: .6em 1em;
+    display: inline-block;
+    max-width: 500px;
+    word-break: break-all;
+    word-wrap: break-word;
+    overflow: auto;
+    white-space: normal;
+    border: 1px solid #D3D3D3;
+    background-color: #ffffff;
+    border-radius: 4px;
+  }
+
+  .robot-dialog {
+
+  }
+
+  .robot-dialog img {
+    /*left: 0;*/
+  }
+
+  .robot-dialog span {
+    margin-left: 10px;
+  }
+
+  .user-dialog {
+    text-align: right;
+  }
+
+  .user-dialog img {
+    float: right;
+  }
+
+  .user-dialog span {
+    color: #ffffff;
+    margin-right: 14px;
+    background-color: #66b1ff;
+    text-align: left;
   }
 
   #text-in {
@@ -79,7 +196,6 @@
     color: #2c3e50;
     line-height: 18px;
     word-break: break-all;
-    /*word-wrap: break-word;*/
     overflow: hidden;
     width: 100%;
     height: 70px;
@@ -91,27 +207,23 @@
   }
 
   footer button {
-    position: absolute;
-    border: 1px solid #D3D3D3;
     font-size: 14px;
     padding: .5em 1em;
     border-radius: 8px;
+    white-space: nowrap;
+    line-height: 1;
     cursor: pointer;
   }
 
   .train-button {
+    position: absolute;
     bottom: 1em;
     left: 1em;
   }
 
   .send-button {
+    position: absolute;
     bottom: 1em;
     right: 1em;
-    color: #ffffff;
-    background-color: #42b983;
-  }
-
-  .send-button:hover {
-    background-color: #48ca8f;
   }
 </style>
