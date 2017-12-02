@@ -17,13 +17,18 @@
                 :class="input === '请简要描述您的问题，如“模式识别是什么”' ? 'withTip' : ''"></textarea>
       <el-button class="train-button" @click="dialogFormVisible = true">训 练</el-button>
       <el-button type="primary" class="send-button" @click="askQuestion">发 送</el-button>
-      <el-dialog title="我也可以教机器人说话啦" :visible.sync="dialogFormVisible">
+      <el-dialog title="来教机器人说话吧" :visible.sync="dialogFormVisible">
         <el-form :model="form">
-          <el-form-item label="问题" :label-width="'120px'">
-            <el-input v-model="form.ask" auto-complete="off"></el-input>
+          <el-form-item>
+            <el-input placeholder="问题" v-model="form.ask" auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="答案" :label-width="'120px'">
-            <el-input v-model="form.answer" auto-complete="off"></el-input>
+          <el-form-item>
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 3, maxRows: 6}"
+              placeholder="答案"
+              v-model="form.answer">
+            </el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -148,7 +153,7 @@
     font-size: 14px;
     padding: .6em 1em;
     display: inline-block;
-    max-width: 500px;
+    max-width: 600px;
     word-break: break-all;
     word-wrap: break-word;
     overflow: auto;
