@@ -6,7 +6,8 @@
     </header>
     <div class="chatbox">
       <div v-for="dialog in dialogs" class="dialog" :class="dialog.isRobot ? 'robot-dialog' : 'user-dialog'">
-        <img :src="dialog.isRobot ? '/static/robot.jpg' : '/static/user.jpg'">
+        <!--<img :src="dialog.isRobot ? '/static/robot.jpg' : '/static/user.jpg'">-->
+        <img :src="dialog.isRobot ? 'https://upload-images.jianshu.io/upload_images/2702529-1b2d9bdeab1c905c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240' : 'https://upload-images.jianshu.io/upload_images/2702529-5b72e8dabd4e0922.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240'">
         <span v-text="dialog.words"></span>
       </div>
     </div>
