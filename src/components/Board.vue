@@ -8,7 +8,15 @@
       <div v-for="dialog in dialogs" class="dialog" :class="dialog.isRobot ? 'robot-dialog' : 'user-dialog'">
         <!--<img :src="dialog.isRobot ? '/static/robot.jpg' : '/static/user.jpg'">-->
         <img :src="dialog.isRobot ? 'https://upload-images.jianshu.io/upload_images/2702529-1b2d9bdeab1c905c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240' : 'https://upload-images.jianshu.io/upload_images/2702529-5b72e8dabd4e0922.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240'">
-        <span v-text="dialog.words"></span>
+        <span class="words" v-text="dialog.words"></span>
+        <div class="appraise" v-if="dialog.isRobot && dialog.hasAppraise">
+          <span class="appraise-tip">评价一下我的回答吧～</span>
+          <el-rate
+            v-model="dialog.appraise"
+            @change="appraise(dialog.appraise, dialog.id)"
+            :colors="['#99A9BF', '#F7BA2A', '#FF9900']">
+          </el-rate>
+        </div>
       </div>
     </div>
     <footer>
@@ -41,7 +49,7 @@
 </template>
 
 <script>
-  import { ask } from '../api/index'
+  import { ask, train, appraise } from '../api/index'
 
   export default {
     name: 'Board',
@@ -51,7 +59,9 @@
         input: '请简要描述您的问题，如“模式识别是什么”',
         dialogs: [{
           isRobot: true,
-          words: 'Hi~模式识别课程的问题都可以试着问问我哦'
+          words: 'Hi~模式识别课程的问题都可以试着问问我哦',
+          hasAppraise: false,
+          id: null
         }],
         dialogFormVisible: false,
         form: {
@@ -83,6 +93,8 @@
             let answerDialog = {}
             answerDialog.isRobot = true
             answerDialog.words = response.answer
+            answerDialog.hasAppraise = true
+            answerDialog.appraise = null
             this.dialogs.push(answerDialog)
           })
           this.input = this.tips
@@ -96,8 +108,23 @@
         } else {
           this.dialogFormVisible = false
           this.$message.success('提交成功，谢谢参与')
-          this.form.ask = ''
-          this.form.answer = ''
+          train({
+            ask: this.form.ask,
+            answer: this.form.answer
+          }).then(() => {
+            this.form.ask = ''
+            this.form.answer = ''
+          })
+        }
+      },
+      appraise (level, id) {
+        if (id !== null) {
+          appraise({
+            level: level,
+            id: id
+          }).then(() => {
+            console.log('appraise')
+          })
         }
       }
     }
@@ -151,8 +178,11 @@
 
   .dialog span {
     font-size: 14px;
-    padding: .6em 1em;
     display: inline-block;
+  }
+
+  .dialog span.words {
+    padding: .6em 1em;
     max-width: 600px;
     word-break: break-all;
     word-wrap: break-word;
@@ -163,8 +193,22 @@
     border-radius: 4px;
   }
 
-  .robot-dialog {
+  div.appraise {
+    display: flex;
+    display: -webkit-flex;
+    -webkit-align-items: center;
+    align-items: center;
+    justify-content: flex-start;
+    -webkit-justify-content: flex-start;
+    margin-left: 80px;
+  }
 
+  .dialog .appraise-tip {
+
+  }
+
+  .robot-dialog {
+    text-align: left;
   }
 
   .robot-dialog img {
@@ -172,6 +216,11 @@
   }
 
   .robot-dialog span {
+    margin-left: 10px;
+  }
+
+  .el-rate {
+    display: inline-block;
     margin-left: 10px;
   }
 
@@ -183,7 +232,7 @@
     float: right;
   }
 
-  .user-dialog span {
+  .user-dialog span.words {
     color: #ffffff;
     margin-right: 14px;
     background-color: #66b1ff;

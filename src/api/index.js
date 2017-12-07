@@ -7,3 +7,19 @@ export function ask (params) {
     params: params
   })
 }
+
+export function train (params) {
+  return fetch({
+    url: '/train',
+    method: 'get',
+    params: params
+  })
+}
+
+export function appraise (params) {
+  return fetch({
+    url: '/appraise',
+    method: 'get',
+    params: params
+  })
+}

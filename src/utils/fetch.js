@@ -18,7 +18,7 @@ service.interceptors.request.use(config => config, (error) => {
 service.interceptors.response.use(response => response.data, (error) => {
   console.log(`err${error}`)
   Message({
-    message: error.message + ', 请刷新',
+    message: '请刷新或者重试：' + error.message,
     type: 'error',
     duration: 5 * 1000
   })
